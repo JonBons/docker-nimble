@@ -3,7 +3,7 @@ FROM ubuntu:16.04
 ## Install nimble and move all config files to /etc/nimble.conf
 ##
 RUN    echo "deb http://nimblestreamer.com/ubuntu xenial/" > /etc/apt/sources.list.d/nimblestreamer.list \
-    && curl -L -s http://nimblestreamer.com/gpg.key | apt-key add - \
+    && wget -qO - http://nimblestreamer.com/gpg.key | apt-key add - \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y nimble nimble-srt \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
