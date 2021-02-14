@@ -1,4 +1,6 @@
 FROM ubuntu:16.04
+## Install wget and ca-certs
+RUN apt-get install -y ca-certificates wget
 
 ## Install nimble and move all config files to /etc/nimble.conf
 ##
