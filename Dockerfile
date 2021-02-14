@@ -1,45 +1,34 @@
-FROM magixus/nimble-server:3.6.7
-ADD file:a3344b835ea6fdc5692df23826c970403656c6947342e117b2ac1a05956679af in /
-RUN /bin/sh -c set -xe          \
-    && echo '#!/bin/sh' > /usr/sbin/policy-rc.d         \
-    && echo 'exit 101' >> /usr/sbin/policy-rc.d         \
-    && chmod +x /usr/sbin/policy-rc.d           \
-    && dpkg-divert --local --rename --add /sbin/initctl         \
-    && cp -a /usr/sbin/policy-rc.d /sbin/initctl        \
-    && sed -i 's/^exit.*/exit 0/' /sbin/initctl                 \
-    && echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/docker-apt-speedup                 \
-    && echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' > /etc/apt/apt.conf.d/docker-clean       \
-    && echo 'APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' >> /etc/apt/apt.conf.d/docker-clean       \
-    && echo 'Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";' >> /etc/apt/apt.conf.d/docker-clean          \
-    && echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/docker-no-languages              \
-    && echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";' > /etc/apt/apt.conf.d/docker-gzip-indexes          \
-    && echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests
-RUN /bin/sh -c rm -rf /var/lib/apt/lists/*
-RUN /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$/\1/g' /etc/apt/sources.list
-RUN /bin/sh -c mkdir -p /run/systemd \
-    && echo 'docker' > /run/systemd/container
-CMD ["/bin/bash"]
-MAINTAINER Phusion <info@phusion.nl>
-COPY dir:e7a5eda59d878c69cfd87231b043d062999bd85e034d8fcd4cb384bfbfe5b471 in /bd_build
-RUN /bin/sh -c /bd_build/prepare.sh \
-    &&  /bd_build/system_services.sh \
-    &&  /bd_build/utilities.sh \
-    &&  /bd_build/cleanup.sh
-ENV DEBIAN_FRONTEND=teletype LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
-CMD ["/sbin/my_init"]
-RUN /bin/sh -c echo "deb http://nimblestreamer.com/ubuntu xenial/" > /etc/apt/sources.list.d/nimblestreamer.list     \
-    && curl -L -s http://nimblestreamer.com/gpg.key | apt-key add -     \
-    && apt-get update     \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y nimble nimble-srt     \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*     \
-    && mkdir /etc/nimble.conf     \
+FROM ubuntu:focal
+
+## Install nimble and move all config files to /etc/nimble.conf
+##
+RUN    echo "deb http://nimblestreamer.com/ubuntu xenial/" > /etc/apt/sources.list.d/nimblestreamer.list \
+    && curl -L -s http://nimblestreamer.com/gpg.key | apt-key add - \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y nimble nimble-srt \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && mkdir /etc/nimble.conf \
     && mv /etc/nimble/* /etc/nimble.conf
-VOLUME [/etc/nimble]
-VOLUME [/var/cache/nimble]
-VOLUME [/videos]
-ENV WMSPANEL_USER=
-ENV WMSPANEL_PASS=
-ENV WMSPANEL_SLICES=
-ADD dir:d7f314e244d6f25e3a2ed01ece23b75338f4495e5aadb1d7bf6f7a63297a5eb9 in /etc/my_init.d
+
+## Configuration volume
+##
+VOLUME /etc/nimble
+
+## Cache volume
+##
+VOLUME /var/cache/nimble
+
+## WMS panel username and password
+## Only required for first time registration
+##
+ENV WMSPANEL_USER	""
+ENV WMSPANEL_PASS	""
+ENV WMSPANEL_SLICES	""
+
+## Service configuration
+##
+ADD files/my_init.d	/etc/my_init.d
+ADD files/service	/etc/service
+ADD files/logrotate.d	/etc/logrotate.d
+
 EXPOSE 1935 8081 4444
