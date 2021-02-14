@@ -1,5 +1,4 @@
 FROM magixus/nimble-server:3.6.7
-ADD file:a3344b835ea6fdc5692df23826c970403656c6947342e117b2ac1a05956679af in /
 RUN /bin/sh -c set -xe          \
     && echo '#!/bin/sh' > /usr/sbin/policy-rc.d         \
     && echo 'exit 101' >> /usr/sbin/policy-rc.d         \
@@ -20,7 +19,7 @@ RUN /bin/sh -c mkdir -p /run/systemd \
     && echo 'docker' > /run/systemd/container
 CMD ["/bin/bash"]
 MAINTAINER Phusion <info@phusion.nl>
-COPY dir:e7a5eda59d878c69cfd87231b043d062999bd85e034d8fcd4cb384bfbfe5b471 in /bd_build
+COPY files/bd_build /bd_build
 RUN /bin/sh -c /bd_build/prepare.sh \
     &&  /bd_build/system_services.sh \
     &&  /bd_build/utilities.sh \
@@ -41,5 +40,5 @@ VOLUME [/videos]
 ENV WMSPANEL_USER=
 ENV WMSPANEL_PASS=
 ENV WMSPANEL_SLICES=
-ADD dir:d7f314e244d6f25e3a2ed01ece23b75338f4495e5aadb1d7bf6f7a63297a5eb9 in /etc/my_init.d
+ADD files/nimble_reg /etc/my_init.d
 EXPOSE 1935 8081 4444
