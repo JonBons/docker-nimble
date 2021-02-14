@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM phusion/baseimage:18.04-1.0.0-amd64
 
 ## Install nimble and move all config files to /etc/nimble.conf
 ##
