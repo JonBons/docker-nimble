@@ -1,4 +1,4 @@
-FROM phusion/baseimage
+FROM ubuntu:16.04
 
 ## Install nimble and move all config files to /etc/nimble.conf
 ##
