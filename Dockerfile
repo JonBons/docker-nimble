@@ -1,5 +1,5 @@
 FROM magixus/nimble-server:3.6.7
-RUN /bin/sh -c set -xe          \
+RUN set -xe          \
     && echo '#!/bin/sh' > /usr/sbin/policy-rc.d         \
     && echo 'exit 101' >> /usr/sbin/policy-rc.d         \
     && chmod +x /usr/sbin/policy-rc.d           \
@@ -13,20 +13,24 @@ RUN /bin/sh -c set -xe          \
     && echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/docker-no-languages              \
     && echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";' > /etc/apt/apt.conf.d/docker-gzip-indexes          \
     && echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests
-RUN /bin/sh -c rm -rf /var/lib/apt/lists/*
-RUN /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$/\1/g' /etc/apt/sources.list
-RUN /bin/sh -c mkdir -p /run/systemd \
+RUN rm -rf /var/lib/apt/lists/*
+RUN sed -i 's/^#\s*\(deb.*universe\)$/\1/g' /etc/apt/sources.list
+RUN mkdir -p /run/systemd \
     && echo 'docker' > /run/systemd/container
 CMD ["/bin/bash"]
 MAINTAINER Phusion <info@phusion.nl>
 COPY files/bd_build /bd_build
+RUN chmod +x /bd_build/prepare.sh \
+    &&  chmod +x /bd_build/system_services.sh \
+    &&  chmod +x /bd_build/utilities.sh \
+    &&  chmod +x /bd_build/cleanup.sh
 RUN /bin/sh -c /bd_build/prepare.sh \
     &&  /bd_build/system_services.sh \
     &&  /bd_build/utilities.sh \
     &&  /bd_build/cleanup.sh
 ENV DEBIAN_FRONTEND=teletype LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 CMD ["/sbin/my_init"]
-RUN /bin/sh -c echo "deb http://nimblestreamer.com/ubuntu xenial/" > /etc/apt/sources.list.d/nimblestreamer.list     \
+RUN echo "deb http://nimblestreamer.com/ubuntu xenial/" > /etc/apt/sources.list.d/nimblestreamer.list     \
     && curl -L -s http://nimblestreamer.com/gpg.key | apt-key add -     \
     && apt-get update     \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y nimble nimble-srt     \
