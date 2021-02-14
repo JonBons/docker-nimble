@@ -1,4 +1,4 @@
-Nimble streaming server
+Nimble streaming server (w/ SRT package)
 =======================
 
 This container provides a [nimble](https://es.wmspanel.com/nimble) streaming server listening on ports **8081** (http) and **1935** (RTMP).
@@ -11,14 +11,14 @@ Usage
 From Docker registry:
 
 ```
-docker pull rjrivero/nimble
+docker pull jonbons/nimble
 ```
 
 Or build yourself:
 
 ```
-git clone https://github.com/rjrivero/docker-nimble.git
-docker build --rm -t rjrivero/nimble docker-nimble
+git clone https://github.com/jonbons/docker-nimble.git
+docker build --rm -t jonbons/nimble docker-nimble
 ```
 
 Running the image:
@@ -28,7 +28,7 @@ docker run --rm -p 8081:8081 -p 1935:1935 \
     -h instance-hostname \
     -e WMSPANEL_USER=your@user.name \
     -e WMSPANEL_PASS=your_password  \
-    --name nimble rjrivero/nimble
+    --name nimble jonbons/nimble
 ```
 
 Configuration
